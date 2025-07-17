@@ -55,7 +55,7 @@ class SimpleFacerec:
             # compares the current face to all the stored ones (self.known_face_encodings)
             # matches is a list of True/False values showing whether it matched each known person.
             # If no match is found, keep the default name as "Unknown"
-            matches = face_recognition.compare_faces(self.known_face_encodings, face_encoding, tolerance=0.4)
+            matches = face_recognition.compare_faces(self.known_face_encodings, face_encoding, tolerance=0.35)
             name = "Unknown"
 
             
