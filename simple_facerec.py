@@ -16,6 +16,8 @@ class SimpleFacerec:
         images_path = glob.glob(os.path.join(images_path, "*.*"))
 
         print(f"{len(images_path)} encoding images found.")
+        
+        encodings_by_name = {}
 
         # store image encoding and names
         for img_path in images_path:
@@ -28,14 +30,25 @@ class SimpleFacerec:
             # breaks down the full file path
             basename = os.path.basename(img_path) # eg "images/kelly.jpg" → "kelly.jpg"
             filename, ext = os.path.splitext(basename) # eg "kelly.jpg" → ("kelly", ".jpg")
+            name = filename.split('_')[0]  # "Kelly_1" -> "Kelly"
 
-            # turn face img into 128-dimensional vector that mathematically describes how the face looks
-            img_encoding = face_recognition.face_encodings(rgb_img)[0]
-
-            # adds the encoding & name to the internal lists, which will be used for matching later
-            self.known_face_encodings.append(img_encoding)
+            encodings = face_recognition.face_encodings(rgb_img)
+            if len(encodings) == 0:
+                print(f"Warning: No face found in {img_path}. Skipping.")
+                continue
+            img_encoding = encodings[0]
             
-            name = ''.join([c for c in filename if not c.isdigit()])
+            if name not in encodings_by_name:
+                encodings_by_name[name] = []
+            encodings_by_name[name].append(img_encoding)
+
+
+        # Average encodings for each person
+        self.known_face_encodings = []
+        self.known_face_names = []
+        for name, enc_list in encodings_by_name.items():
+            avg_encoding = np.mean(enc_list, axis=0)
+            self.known_face_encodings.append(avg_encoding)
             self.known_face_names.append(name)
         print("Encoding images loaded")
 
